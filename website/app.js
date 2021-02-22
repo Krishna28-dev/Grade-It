@@ -1,4 +1,12 @@
 import express from "express";
+import morgan from "morgan";
+
+import dbConnection from "./utils/db.js";
+import { environment } from "./config/config.js";
+
+const app = express();
+
+environment == "dev" && app.use(morgan("dev"));
 
 app.get("/", (req, res) => res.send("Hello world"));
 
