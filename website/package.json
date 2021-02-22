@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "A one stop portal to conduct tests",
   "main": "app.js",
+  "type": "module",
   "scripts": {
     "start": "node app.js"
   },
