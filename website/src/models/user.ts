@@ -1,5 +1,6 @@
-import { Schema } from "mongoose";
+import { Schema, Document } from "mongoose";
 import bcrypt from "bcrypt";
+import { NextFunction } from "express";
 
 const UserSchema = new Schema({
   name: {
@@ -14,13 +15,13 @@ const UserSchema = new Schema({
     type: String,
     required: true,
   },
-  isExaminer: {
+  isStudent: {
     type: Boolean,
-    default: false,
+    default: true,
   },
 });
 
-UserSchema.pre("save", async function (next) {
+UserSchema.pre("save", async function (this: IUser, next: NextFunction) {
   try {
     // check if the password has been modified, if yes hash it.
     if (!this.isModified("password")) return next();
@@ -34,3 +35,10 @@ UserSchema.pre("save", async function (next) {
     return next({ status: 500, message: err });
   }
 });
+
+interface IUser extends Document {
+  name: string;
+  email: string;
+  password: string;
+  isStudent: boolean;
+}

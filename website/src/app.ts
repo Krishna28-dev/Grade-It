@@ -2,13 +2,13 @@ import express from "express";
 import morgan from "morgan";
 
 import dbConnection from "./utils/db.js";
-import { environment } from "./config/config.js";
-import { errorHandler } from "./middleware/error.js";
+import { config } from "../config/config";
+import { errorHandler } from "./middleware/error";
 
 const app = express();
 dbConnection();
 
-environment == "dev" && app.use(morgan("dev"));
+config.environment == "dev" && app.use(morgan("dev"));
 
 app.get("/", (req, res) => res.send("Hello world"));
 

@@ -1,13 +1,13 @@
 import mongoose from "mongoose";
-import { mongoose as _mongoose, environment } from "../config/config.js";
+import { config } from "../../config/config";
 
-const MONGO_HOSTNAME = _mongoose.MONGO_HOSTNAME;
-const MONGO_PORT = _mongoose.MONGO_PORT;
-const MONGO_DB = _mongoose.MONGO_DB;
+const MONGO_HOSTNAME = config.mongoose.hostName;
+const MONGO_PORT = config.mongoose.portNumber;
+const MONGO_DB = config.mongoose.databaseName;
 
 const url = `mongodb://${MONGO_HOSTNAME}:${MONGO_PORT}/${MONGO_DB}`;
 
-environment == "dev" && mongoose.set("debug", true); // To see mongoose data in the terminal Mongoose : ***
+config.environment == "dev" && mongoose.set("debug", true); // To see mongoose data in the terminal Mongoose : ***
 mongoose.Promise = Promise; // To use async functions
 
 export default () => {
