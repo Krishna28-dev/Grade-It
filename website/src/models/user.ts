@@ -1,4 +1,4 @@
-import { Schema, Document } from "mongoose";
+import { Schema, Document, Model, model } from "mongoose";
 import bcrypt from "bcrypt";
 import { NextFunction } from "express";
 
@@ -10,6 +10,7 @@ const UserSchema = new Schema({
   email: {
     type: String,
     required: true,
+    unique: true,
   },
   password: {
     type: String,
@@ -36,9 +37,30 @@ UserSchema.pre("save", async function (this: IUser, next: NextFunction) {
   }
 });
 
-interface IUser extends Document {
+UserSchema.methods.comparePassword = async function (
+  this: IUser,
+  inputPassword: string
+): Promise<boolean> {
+  return new Promise<boolean>(async (resolve, reject) => {
+    try {
+      const isMatch = await bcrypt.compare(inputPassword, this.password);
+      resolve(isMatch);
+    } catch (err) {
+      // promise won't get rejected for password-mismatch,
+      // only bcrypt error will cause promise reject
+      reject(err);
+    }
+  });
+};
+
+export const User: Model<IUser> = model<IUser>("Users", UserSchema);
+
+export interface IUser extends Document {
   name: string;
   email: string;
   password: string;
   isStudent: boolean;
+
+  // methods
+  comparePassword(inputPassword: string): Promise<boolean>;
 }
