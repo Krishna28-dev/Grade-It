@@ -1,4 +1,5 @@
 import { Schema, Document, model } from "mongoose";
+import { ITest } from "./test";
 import { IUser } from "./user";
 
 const ClassroomSchema = new Schema({
@@ -12,24 +13,31 @@ const ClassroomSchema = new Schema({
   },
   createdBy: {
     type: Schema.Types.ObjectId,
-    ref: "users",
+    ref: "Users",
   },
   participants: [
     {
       type: Schema.Types.ObjectId,
-      ref: "users",
+      ref: "Users",
     },
   ],
   applicants: [
     {
       type: Schema.Types.ObjectId,
-      ref: "users",
+      ref: "Users",
     },
   ],
   rejected: [
     {
       type: Schema.Types.ObjectId,
-      ref: "users",
+      ref: "Users",
+    },
+  ],
+
+  tests: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Tests",
     },
   ],
 });
@@ -52,11 +60,11 @@ export interface IClassroom extends Document {
   applicants: IUser[];
   rejected: IUser[];
 
-  // tests:
+  tests: ITest[];
   // Assignments
 
   // methods
   checkStudentStatus(userId: any): string;
 }
 
-export const Classroom = model<IClassroom>("Classroom", ClassroomSchema);
+export const Classroom = model<IClassroom>("Classrooms", ClassroomSchema);
