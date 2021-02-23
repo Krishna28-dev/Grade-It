@@ -1,6 +1,7 @@
-import { Schema, Document, Model, model } from "mongoose";
+import { Schema, Document, model } from "mongoose";
 import bcrypt from "bcrypt";
 import { NextFunction } from "express";
+import { IClassroom } from "./classRoom";
 
 const UserSchema = new Schema({
   name: {
@@ -20,6 +21,18 @@ const UserSchema = new Schema({
     type: Boolean,
     default: true,
   },
+  // classrooms created by faculty,
+  // classrooms students are part of
+  classRooms: [
+    {
+      classroomId: {
+        type: Schema.Types.ObjectId,
+        ref: "Classroom",
+      },
+      // tests : []
+      // assignments: []
+    },
+  ],
 });
 
 UserSchema.pre("save", async function (this: IUser, next: NextFunction) {
@@ -53,13 +66,15 @@ UserSchema.methods.comparePassword = async function (
   });
 };
 
-export const User: Model<IUser> = model<IUser>("Users", UserSchema);
+export const User = model<IUser>("Users", UserSchema);
 
 export interface IUser extends Document {
   name: string;
   email: string;
   password: string;
   isStudent: boolean;
+
+  classRooms: IClassroom[];
 
   // methods
   comparePassword(inputPassword: string): Promise<boolean>;
