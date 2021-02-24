@@ -1,5 +1,6 @@
 import { Schema, Document, model } from "mongoose";
 import { IClassroom } from "./classRoom";
+import { IProblem } from "./Problem";
 import { IUser } from "./user";
 
 // Schema for a single test
@@ -36,9 +37,14 @@ const TestSchema = new Schema({
     type: Number,
   },
 
+  isPublished: {
+    type: Boolean,
+    default: false,
+  },
+
   questionBank: [
     {
-      mark: {
+      marks: {
         type: Number,
         required: true,
       },
@@ -47,16 +53,45 @@ const TestSchema = new Schema({
         type: Number,
         required: true,
       },
-      // problems: [
-      //   {
-      //     type: Schema.Types.ObjectId,
-      //     ref: "Problem",
-      //   },
-      // ],
+      problems: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: "Problems",
+        },
+      ],
     },
   ],
 });
 
+// returns the index of the questionBank object with the given marks
+TestSchema.methods.findQuestionBankIndex = function (
+  this: ITest,
+  questionBankIndex: number
+): number {
+  return this.questionBank.findIndex(
+    (question) => question.marks === questionBankIndex
+  );
+};
+
+// returns the total sum of all the marks * no of questions
+TestSchema.methods.calculateTotalMarks = function (this: ITest): number {
+  return this.questionBank.reduce(
+    (sum, q) => (sum += q.marks * q.questionCount),
+    0
+  );
+};
+
+// TODO: Finish this method
+// edits all the marks of a problems in a single questionBank object
+TestSchema.methods.editsAllDocuments = function (
+  this: ITest,
+  questionBankIndex: number,
+  marks: number
+) {
+  // finish thi
+};
+
+export const Test = model<ITest>("Tests", TestSchema);
 export interface ITest extends Document {
   name: string;
   description: string;
@@ -65,11 +100,14 @@ export interface ITest extends Document {
   endTime: Date;
   classroom: IClassroom;
   totalMarks: number;
+  isPublished: boolean;
   questionBank: {
-    mark: number;
+    marks: number;
     questionCount: number;
-    // problems
+    problems: IProblem[];
   }[];
-}
 
-export const Test = model<ITest>("Tests", TestSchema);
+  // methods
+  findQuestionBankIndex(questionBankIndex: number): number;
+  calculateTotalMarks(): number;
+}
