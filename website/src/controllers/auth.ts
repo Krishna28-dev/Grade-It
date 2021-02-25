@@ -2,16 +2,16 @@ import { Handler } from "express";
 import { User } from "../models/user";
 
 const loginFormHandler: Handler = async (req, res, next) => {
-  res.send("Login Form");
+  res.render("auth/login");
 };
 
 const registerForm: Handler = async (req, res, next) => {
-  res.send("Register Form");
+  res.render("auth/register");
 };
 
 const loginHandler: Handler = async (req, res, next) => {
   try {
-    console.log(req.body.email);
+    console.log(req.body);
 
     const user = await User.findOne({ email: req.body.email });
 
@@ -34,9 +34,10 @@ const registerHandler: Handler = async (req, res, next) => {
     console.log(req.body);
 
     const newUser = {
-      name: req.body.username,
-      email: req.body.email,
-      password: req.body.password,
+      name: String(req.body.username),
+      email: String(req.body.email),
+      password: String(req.body.password),
+      isStudent: req.body.type === "0",
     };
 
     const user = await User.create(newUser);

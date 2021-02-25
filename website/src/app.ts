@@ -2,6 +2,7 @@ import express from "express";
 import morgan from "morgan";
 import bodyParser from "body-parser";
 import session from "express-session";
+import path from "path";
 
 import dbConnection from "./utils/db.js";
 import { config } from "../config/config";
@@ -10,8 +11,6 @@ import { authRouter } from "./routes/auth.js";
 
 const app = express();
 dbConnection();
-
-config.environment == "dev" && app.use(morgan("dev"));
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json({ strict: false }));
@@ -26,7 +25,11 @@ app.use(
   })
 );
 
-app.get("/", (req, res) => res.send("Hello world"));
+app.use(express.static(path.join(__dirname, "../../public")));
+app.set("views", path.join(__dirname, "../../views"));
+app.set("view engine", "ejs");
+
+config.environment == "dev" && app.use(morgan("dev"));
 
 app.use("/auth", authRouter);
 

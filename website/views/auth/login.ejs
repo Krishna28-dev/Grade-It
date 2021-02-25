@@ -1,0 +1,22 @@
+<%- include('../partials/header')  %>
+
+<link rel="stylesheet" href="/stylesheets/login.css">
+
+<main class="form">
+
+  <form action="/auth/login" method="post">
+    <h1 class="h1 mb-3 fw-normal">Log In</h1>
+    <label class="my-1 mr-2" for="email">Email : </label>
+    <input type="email" name="email" class="form-control" id="" placeholder="Email Address">
+    <label class="my-1 mr-2" for="password">Password : </label>
+    <input type="password" name="password" class="form-control" id="" placeholder="Password">
+    <br>
+    <button type="submit" class="w-100 btn btn-lg btn-primary">Log-In</button>
+  </form>
+  <br>
+  <p>Don't have an account ?
+    <a href="/auth/register">Register</a>
+  </p>
+</main>
+
+<%- include('../partials/footer.ejs')  %>
