@@ -1,6 +1,7 @@
 import { Handler } from "express";
 import { Problem } from "../models/Problem";
 import { Test } from "../models/test";
+import { unlinkSync } from "fs";
 
 const addProblem: Handler = async (req, res, next) => {
   try {
@@ -34,6 +35,43 @@ const addProblem: Handler = async (req, res, next) => {
       await test.save();
       return;
     }
+  } catch (err) {
+    next({ status: 500, message: err });
+  }
+};
+
+const editProblem: Handler = async (req, res, next) => {
+  try {
+    // change path problem
+
+    const problemId = req.params.problemId;
+    const problem = await Problem.findById(problemId);
+
+    //TODO: Multer integration
+
+    // delete old doc
+    unlinkSync(problem.questionPath);
+    const newPath = "foo11";
+    problem.questionPath = newPath;
+
+    await problem.save();
+
+    return res.status(200).send("Done");
+  } catch (err) {
+    next({ status: 500, message: err });
+  }
+};
+
+const deleteProblem: Handler = async (req, res, next) => {
+  try {
+    //
+
+    const problemId = req.params.problemId;
+    const problem = await Problem.findById(problemId);
+
+    await problem.delete();
+
+    return res.status(200).send("Done");
   } catch (err) {
     next({ status: 500, message: err });
   }

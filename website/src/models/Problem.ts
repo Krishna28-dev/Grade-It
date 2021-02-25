@@ -1,5 +1,7 @@
+import { NextFunction } from "express";
 import { Schema, Document, model } from "mongoose";
 import { ITest } from "./test";
+import { unlinkSync } from "fs";
 
 const ProblemSchema = new Schema({
   marks: {
@@ -18,6 +20,16 @@ const ProblemSchema = new Schema({
 });
 
 // ProblemSchema.methods.updateQ
+
+//middleware to delete the doc if the problem is deleted
+ProblemSchema.pre(
+  "remove",
+  { document: true, query: false },
+  function (this: IProblem, next: NextFunction) {
+    unlinkSync(this.questionPath);
+    return next();
+  }
+);
 
 export interface IProblem extends Document {
   marks: number;

@@ -89,7 +89,9 @@ TestSchema.methods.editAllProblemsMark = async function (
 ) {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      const { problems } = this.questionBank[questionBankIndex];
+      let { problems } = this.questionBank[questionBankIndex];
+      problems = JSON.parse(JSON.stringify(problems));
+
       if (marks !== -1) {
         for (let problem of problems) {
           problem.marks = marks;
@@ -98,7 +100,6 @@ TestSchema.methods.editAllProblemsMark = async function (
       } else {
         for (let problem of problems) {
           await problem.delete();
-          // TODO: Add middleware to delete the document
         }
       }
       resolve();

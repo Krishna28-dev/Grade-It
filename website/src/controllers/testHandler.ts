@@ -48,6 +48,19 @@ const viewAllTests: Handler = async (req, res, next) => {
   }
 };
 
+// view a test
+const viewSingleTest: Handler = async (req, res, next) => {
+  try {
+    const { testId } = req.params;
+
+    const test = await Test.findById(testId).populate("problems");
+
+    return res.status(200).json(test);
+  } catch (err) {
+    next({ status: 500, err });
+  }
+};
+
 // CRUD Operations for Question bank
 
 const addItemToQuestionBank: Handler = async (req, res, next) => {
@@ -82,8 +95,6 @@ const addItemToQuestionBank: Handler = async (req, res, next) => {
     next({ status: 500, message: err });
   }
 };
-
-// TODO: Add view all problems route
 
 const updateQuestionInQuestionBank: Handler = async (req, res, next) => {
   try {
