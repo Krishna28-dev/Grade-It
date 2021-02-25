@@ -88,6 +88,7 @@ const rejectApplicant: Handler = async (req, res, next) => {
   }
 };
 
+// Check if a student is an applicant, participant or rejected
 const studentStatus: Handler = async (req, res, next) => {
   try {
     const userId = (req.session as any).user.id;

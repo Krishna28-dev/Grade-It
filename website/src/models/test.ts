@@ -81,14 +81,31 @@ TestSchema.methods.calculateTotalMarks = function (this: ITest): number {
   );
 };
 
-// TODO: Finish this method
-// edits all the marks of a problems in a single questionBank object
-TestSchema.methods.editsAllDocuments = function (
+// updates all the marks of all problems in a single questionBank object, if marks ==  -1, it deletes the documents
+TestSchema.methods.editAllProblemsMark = async function (
   this: ITest,
   questionBankIndex: number,
   marks: number
 ) {
-  // finish thi
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      const { problems } = this.questionBank[questionBankIndex];
+      if (marks !== -1) {
+        for (let problem of problems) {
+          problem.marks = marks;
+          await problem.save();
+        }
+      } else {
+        for (let problem of problems) {
+          await problem.delete();
+          // TODO: Add middleware to delete the document
+        }
+      }
+      resolve();
+    } catch (err) {
+      reject(err);
+    }
+  });
 };
 
 export const Test = model<ITest>("Tests", TestSchema);
@@ -110,4 +127,5 @@ export interface ITest extends Document {
   // methods
   findQuestionBankIndex(questionBankIndex: number): number;
   calculateTotalMarks(): number;
+  editAllProblemsMark(questionBankIndex: number, marks: number): Promise<void>;
 }

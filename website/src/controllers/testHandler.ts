@@ -53,7 +53,6 @@ const viewAllTests: Handler = async (req, res, next) => {
 const addItemToQuestionBank: Handler = async (req, res, next) => {
   try {
     const testId = req.params.testId;
-
     const test = await Test.findById(testId);
 
     const { marks, questionCount } = req.body;
@@ -73,6 +72,7 @@ const addItemToQuestionBank: Handler = async (req, res, next) => {
       problems: [],
     });
 
+    // TODO: Add this add a method
     // recalculate total-marks
     test.totalMarks = test.calculateTotalMarks();
 
@@ -83,7 +83,8 @@ const addItemToQuestionBank: Handler = async (req, res, next) => {
   }
 };
 
-// TODO: Finish this route
+// TODO: Add view all problems route
+
 const updateQuestionInQuestionBank: Handler = async (req, res, next) => {
   try {
     // if user changes mark of question, it might conflict with another question,
@@ -112,17 +113,83 @@ const updateQuestionInQuestionBank: Handler = async (req, res, next) => {
       // so just find the questionBank and change the questionCount
       const markIndex = test.findQuestionBankIndex(o_marks);
       test.questionBank[markIndex].questionCount = questionCount;
+
+      // recalculate total-marks
+      test.totalMarks = test.calculateTotalMarks();
+
+      await test.save();
+      return res.status(200).send("test has been updated");
     } else {
       // the mark of question has been changed
 
-      const markIndex = test.findQuestionBankIndex(o_marks);
-      if (markIndex == -1) {
-        // a new mark has been added
-        // remove old one from array, add new one
-        // reflect the changes in the problems model,// TODO: add middleware for it
+      const newMarkIndex = test.findQuestionBankIndex(marks); // index of the new-mark
+      const oldMarkIndex = test.findQuestionBankIndex(o_marks); // index of the old-mark(which needs to be updated)
+
+      if (newMarkIndex == -1) {
+        // a new mark has been added, which doesn't  conflict with existing marks
+        // update that array element
+
+        // changing all the marks of Problem sub-document
+        await test.editAllProblemsMark(oldMarkIndex, marks);
+
+        test.questionBank[oldMarkIndex].marks = marks;
+        test.questionBank[oldMarkIndex].questionCount = questionCount;
+
+        // recalculate total-marks
+        test.totalMarks = test.calculateTotalMarks();
+        await test.save();
+        return res.send("test has been updated");
+      } else {
+        // conflicts with existing mark,
+        await test.editAllProblemsMark(oldMarkIndex, marks);
+
+        // update sub-document, push it to the array
+        const newProblems = test.questionBank[newMarkIndex].problems;
+        test.questionBank[newMarkIndex].problems = test.questionBank[
+          newMarkIndex
+        ].problems.concat(newProblems);
+
+        // remove the old obj, update the new one
+        test.questionBank.splice(oldMarkIndex, 1);
+        test.questionBank[newMarkIndex].questionCount = questionCount;
+
+        // recalculate total-marks
+        test.totalMarks = test.calculateTotalMarks();
+
+        await test.save();
+
+        return res.status(200).send("test has been updated");
       }
     }
-  } catch (err) {}
+  } catch (err) {
+    next({ status: 500, message: err });
+  }
+};
+
+const deleteQuestionInQuestionBank: Handler = async (req, res, next) => {
+  try {
+    //
+
+    const testId = req.params.testId;
+    const test = await Test.findById(testId).populate("tests");
+
+    const { marks }: { marks: number } = req.body;
+
+    const markIndex = test.findQuestionBankIndex(marks);
+    if (markIndex === -1) {
+      // such doc doesn't exist
+      return res.status(400).send("Such doc doesn't exist");
+    }
+    // deletes all the problem sub-document(s)
+    await test.editAllProblemsMark(markIndex, -1);
+
+    test.questionBank.splice(markIndex, 1);
+
+    await test.save();
+    return res.status(200).send("Deleted");
+  } catch (err) {
+    next({ status: 500, message: err });
+  }
 };
 
 export { createTestForm, createTestHandler, viewAllTests };
