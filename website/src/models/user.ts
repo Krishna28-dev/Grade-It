@@ -2,6 +2,8 @@ import { Schema, Document, model } from "mongoose";
 import bcrypt from "bcrypt";
 import { NextFunction } from "express";
 import { IClassroom } from "./classRoom";
+import { ITest } from "./test";
+import { IResponse } from "./response";
 
 const UserSchema = new Schema({
   name: {
@@ -29,8 +31,22 @@ const UserSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: "Classroom",
       },
-      // tests : []
-      // assignments: []
+      submissions: [
+        {
+          testId: {
+            type: Schema.Types.ObjectId,
+            ref: "Tests",
+          },
+          // AssignmentId : {
+          //   type: Schema.Types.ObjectId,
+          //   ref: "Assignments",
+          // },
+          ResponseId: {
+            type: Schema.Types.ObjectId,
+            ref: "Responses",
+          },
+        },
+      ],
     },
   ],
 });
@@ -74,7 +90,14 @@ export interface IUser extends Document {
   password: string;
   isStudent: boolean;
 
-  classRooms: IClassroom[];
+  classRooms: {
+    classroomId: IClassroom;
+    submissions?: {
+      testId: ITest;
+      response: IResponse;
+      // assignment
+    }[];
+  }[];
 
   // methods
   comparePassword(inputPassword: string): Promise<boolean>;

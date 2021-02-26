@@ -42,7 +42,7 @@ const viewAllTests: Handler = async (req, res, next) => {
 
     const { tests } = await Classroom.findById(classroomId).populate("tests");
 
-    res.status(200).send(tests);
+    res.status(200).json(tests);
   } catch (err) {
     next({ status: 500, message: err });
   }
@@ -58,6 +58,52 @@ const viewSingleTest: Handler = async (req, res, next) => {
     return res.status(200).json(test);
   } catch (err) {
     next({ status: 500, err });
+  }
+};
+
+const viewPublicTests: Handler = async (req, res, next) => {
+  try {
+    const classroomId = req.params.classId;
+
+    const { tests } = await Classroom.findById(classroomId).populate("tests");
+
+    const publicTests = tests.filter((test) => test.isPublished === true);
+
+    res.status(200).json(publicTests);
+  } catch (err) {
+    next({ status: 500, message: err });
+  }
+};
+
+// checks if test satisfies public conditions, and makes it public
+const makeTestPublicHandler: Handler = async (req, res, next) => {
+  try {
+    const testId = req.params.testId;
+
+    const test = await Test.findById(testId);
+
+    let testCanBeMadePublic = true;
+
+    test.questionBank.forEach((ques) => {
+      if (ques.questionCount > ques.problems.length) {
+        testCanBeMadePublic = false;
+      }
+    });
+
+    if (!testCanBeMadePublic) {
+      return res
+        .status(400)
+        .send(
+          "Test cannot be made public because, of insufficient problems uploaded"
+        );
+    }
+
+    test.isPublished = true;
+    await test.save();
+
+    return res.status(200).send("Made public");
+  } catch (err) {
+    next({ status: 500, message: err });
   }
 };
 
